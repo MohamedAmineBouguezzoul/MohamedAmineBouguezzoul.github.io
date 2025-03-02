@@ -1,0 +1,344 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <link href="https://fonts.googleapis.com/css2?family=Amiri&display=swap" rel="stylesheet">
+
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>مواقيت الصلاة في مونتريال</title>
+    <style>
+        body { 
+            background-image: linear-gradient(to bottom, #026f0b, #7b830b);
+            font-family: 'Amiri', serif;
+            color: #ffd000; /* Gold Text */
+            text-align: center;
+            margin: 0;
+            padding: 0;
+            direction: rtl; /* Right-to-left text direction */  
+        }
+        
+        .container {
+            font-family: 'Amiri', serif;
+            width: 60%;
+            margin: auto;
+            padding: 20px;
+            background-color: rgba(26, 87, 7, 0.386); /* Slight transparency */
+            box-shadow: 0px 0px 15px rgba(255, 215, 0, 0.5); /* Gold glow */
+            border-radius: 12px;
+        }
+        
+        .prayer-time {
+            font-family: 'Amiri', serif;
+            background-color: rgba(8, 0, 28, 0.7);
+            color: #ffea00a0;
+            font-weight: bold;
+            margin: 10px auto;
+            padding: 15px;
+            width: 80%;
+            border-radius: 15px;
+            box-shadow: 0px 0px 10px rgba(255, 215, 0, 0.5);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .night-time {
+            font-family: 'Amiri', serif;
+            background-color: rgb(0, 47, 9);
+            color: #507c09a0;
+            font-weight: bold;
+            margin: 10px auto;
+            padding: 15px;
+            width: 80%;
+            border-radius: 15px;
+            box-shadow: 0px 0px 10px rgba(255, 215, 0, 0.5);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        h1 {
+            background-color: rgba(8, 0, 28, 0.7);
+            border-radius: 30px;
+            font-family: 'Amiri', serif;
+            color: #ffd900; /* Gold */
+            /* text-shadow: 2px 2px 5px rgba(255, 255, 255, 0.8); */
+        }
+        h2 {
+            background-color: rgba(8, 0, 28, 0.7);
+            border-radius: 30px;
+        }
+        
+        table {
+            width: 100%;
+            margin-top: 20px;
+            border-collapse: collapse;
+        }
+        
+        th, td {
+            font-family: 'Amiri', serif;
+            padding: 12px;
+            text-align: center;
+            border: 1px solid #FFD700; /* Gold Borders */
+        }
+        
+        th {
+            background-color: #002147; /* Dark Navy */
+            color: #FFD700; /* Gold */
+        }
+        
+        td {
+            background-color: rgba(8, 0, 28, 0.447); /* Light background for contrast */
+            color: #ffea00a0;
+            font-weight: bold;
+        }
+        
+        .footer {
+            font-family: 'Amiri', serif;
+            margin-top: 40px;
+            color: #ffffff91;
+            text-shadow: 2px 2px 5px rgba(217, 134, 225, 0.56);
+            font-size: 14px;
+        }
+        
+        .time-left {
+            background-color: rgba(8, 0, 28, 0.7);
+            border-radius: 30px;
+            margin: 10px auto;
+            justify-content: space-between;
+            margin-top: 20px;
+            font-size: 18px;
+            font-weight: bold;
+            color: #ffd500;
+            width: 50%;
+        }
+        .digital-clock {
+            background-color: rgba(0, 40, 15, 0.7);
+            color: rgb(255, 255, 255);
+            border-radius: 30px;
+            margin: 10px auto;
+            justify-content: space-between;
+            font-size: 48px;
+            font-weight: bold;
+            width: 30%;
+            align-items: center;
+        }
+        .prayer-highlight {
+            background-color: #bbd00090;
+            color: rgb(255, 255, 255);
+        }
+        .hadith-container {
+            margin-top: 20px;
+            color: rgb(255, 255, 255);
+            font-family: 'Amiri', serif;
+            padding: 10px;
+            background-color: rgba(0, 93, 4, 0.7);
+            border-radius: 15px;
+            box-shadow: 0px 0px 10px rgba(255, 255, 0, 0.5);
+        }
+    </style>
+</head>
+<body>
+
+
+    <div class="container">
+        <h1>مواقيت الصلاة في مونتريال</h1>
+        <div class="digital-clock" id="digital-clock"></div>
+        <div id="current-date" class="date"></div> 
+        <div id="hijri-date" class="hijri-date"></div>
+        
+        
+        <div id="prayer-times"></div>
+        <div id="night-times"></div>
+        
+        <div id="time-left" class="time-left"></div>
+        
+        <div class="footer">
+            <p>مواقيت الصلاة تقريبية وقد تختلف. يرجى التحقق من المسجد المحلي للحصول على المواقيت الدقيقة.</p>
+        </div>
+        <h2>حديث اليوم</h2>
+        <div id="daily-hadith" class="hadith-container"></div> <!-- Hadith Section -->
+    </div>
+    
+
+<script>
+    function addMinutes(timeString, minutes) {
+        const [hours, minutesPart] = timeString.split(':').map(Number);
+        const date = new Date(0, 0, 0, hours, minutesPart);
+        date.setMinutes(date.getMinutes() + minutes);
+        const hoursNew = String(date.getHours()).padStart(2, '0');
+        const minutesNew = String(date.getMinutes()).padStart(2, '0');
+        return `${hoursNew}:${minutesNew}`;
+    }
+
+    function fetchDailyHadith() {
+        fetch('https://hadithapi.com/api/hadiths?apiKey=$2y$10$MsZphY9ahLt12vzXXWNECOGVAnWPiyk4Nw0CmKtRx7eL2Y7gwZkZ2', {
+            headers: { 'X-API-Key': '$2y$10$MsZphY9ahLt12vzXXWNECOGVAnWPiyk4Nw0CmKtRx7eL2Y7gwZkZ2' } // Get an API key from sunnah.com
+        })
+        .then(response => response.json())
+        .then(data => {
+            const randomInt = Math.floor(Math.random() * 24) + 1;
+            const hadithText = data.hadiths.data[randomInt].hadithArabic; // Extract the Hadith text
+            const hadithContainer = document.getElementById('daily-hadith');
+            hadithContainer.innerHTML = `<p>${hadithText}</p>`;
+        })
+        .catch(error => {
+            console.error('Error fetching Hadith:', error);
+            document.getElementById('daily-hadith').innerHTML = '<p>تعذر تحميل الحديث اليوم. يرجى المحاولة لاحقًا.</p>';
+            
+        });
+    }
+    
+
+    function calculateNightTimes(maghrib, fajr) {
+        const maghribTime = maghrib.split(':').map(Number);
+        const fajrTime = fajr.split(':').map(Number);
+        
+        let maghribDate = new Date(0, 0, 0, maghribTime[0], maghribTime[1]);
+        let fajrDate = new Date(0, 0, 0, fajrTime[0], fajrTime[1]);
+
+        if (fajrDate < maghribDate) {
+            fajrDate.setDate(fajrDate.getDate() + 1);
+        }
+
+        const nightDuration = (fajrDate - maghribDate) / 1000 / 60 / 60; // in hours
+        const thirdOfNight = nightDuration / 3 * 60; // one third in minutes
+        
+        const firstThirdEnd = addMinutes(maghrib, thirdOfNight);
+        const middleOfNight = addMinutes(maghrib, thirdOfNight * 3/2);
+        const lastThirdStart = addMinutes(maghrib, thirdOfNight * 2);
+
+        return {
+            firstThirdEnd,
+            middleOfNight,
+            lastThirdStart
+        };
+    }
+
+    function timeLeftToIftar(maghribTime, fajrTime) {
+        const currentTime = new Date();
+        const maghrib = new Date(currentTime.toDateString() + ' ' + maghribTime);
+        const fajr = new Date(currentTime.toDateString() + ' ' + fajrTime);
+        
+        const diffInMs = maghrib - currentTime;
+        const hours = Math.floor(diffInMs / (1000 * 60 * 60));
+        const minutes = Math.floor((diffInMs % (1000 * 60 * 60)) / (1000 * 60));
+        
+        if (currentTime >= maghrib) {    
+            return 'لقد مر وقت الإفطار. يرجى التحقق من المسجد المحلي.';
+        }
+
+        return `الوقت المتبقي للإفطار: ${hours} ساعة و ${minutes} دقيقة`;
+    }
+
+    function highlightNextPrayer(prayerTimes) {
+        const now = new Date();
+        const currentTime = now.getHours() * 60 + now.getMinutes(); // Convert current time to minutes
+        
+    // Remove previous highlights
+    prayerTimes.forEach(prayer => prayer.element.classList.remove('prayer-highlight'));
+
+    // Find the next prayer
+    const nextPrayer = prayerTimes.find(prayer => {
+        const [hours, minutes] = prayer.time.split(':').map(Number);
+        return (hours * 60 + minutes) > currentTime;
+    });
+
+    // Highlight only the next prayer
+    if (nextPrayer) {
+        nextPrayer.element.classList.add('prayer-highlight');
+    }
+    else {
+        prayerTimes[0].element.classList.add('prayer-highlight');
+    }
+}
+
+
+    function updateClock() {
+        const now = new Date();
+        let hours = now.getHours();
+        let minutes = now.getMinutes();
+        let seconds = now.getSeconds();
+        hours = hours < 10 ? '0' + hours : hours;
+        minutes = minutes < 10 ? '0' + minutes : minutes;
+        seconds = seconds < 10 ? '0' + seconds : seconds;
+        document.getElementById('digital-clock').innerText = `${hours}:${minutes}:${seconds}`;
+    }
+    setInterval(updateClock, 1000);
+    updateClock();
+
+    function displayCurrentDate() {
+        const currentDate = new Date();
+        const options = { year: 'numeric', month: 'long', day: 'numeric', weekday: 'long' };
+        const formattedDate = currentDate.toLocaleDateString('ar-CA', options);
+        document.getElementById('current-date').textContent = ` التاريخ الميلادي:  ${formattedDate}`;
+    }
+
+    function displayHijriDate() {
+    fetch('https://api.aladhan.com/v1/timingsByCity?city=Montreal&country=Canada&method=2')
+    .then(response => response.json())
+    .then(data => {
+        const hijriDate = data.data.date.hijri;
+        document.getElementById('hijri-date').textContent = `التاريخ الهجري: ${hijriDate.day} ${hijriDate.month.ar} ${hijriDate.year}`;
+        })
+        .catch(error => console.error('Error fetching Hijri date:', error));
+}
+
+  fetch('https://api.aladhan.com/v1/timingsByCity?city=Montreal&country=Canada&method=2')
+        .then(response => response.json())
+        .then(data => {
+            const timings = data.data.timings;
+            const maghrib = timings.Maghrib;
+            const fajr = timings.Fajr;
+            
+            const nightTimes = calculateNightTimes(maghrib, fajr);
+            const timeToIftar = timeLeftToIftar(maghrib);
+
+            const prayerTimes = [
+                { name: 'الفجر', time: timings.Fajr },
+                { name: 'الشروق', time: timings.Sunrise },
+                { name: 'الظهر', time: timings.Dhuhr },
+                { name: 'العصر', time: timings.Asr },
+                { name: 'المغرب', time: timings.Maghrib },
+                { name: 'العشاء', time: timings.Isha },
+            ];
+            const NightTimes = [
+                { name: 'ثلث الليل الأول', time: nightTimes.firstThirdEnd },
+                { name: 'منتصف الليل', time: nightTimes.middleOfNight },
+                { name: 'ثلث الليل الأخير', time: nightTimes.lastThirdStart }
+                ];
+
+            const prayerTimesContainer = document.getElementById('prayer-times');
+            prayerTimes.forEach(prayer => {
+                const prayerDiv = document.createElement('div');
+                prayerDiv.className = 'prayer-time';
+                prayerDiv.innerHTML = `<span>${prayer.name}</span> <span>${prayer.time}</span>`;
+                prayerTimesContainer.appendChild(prayerDiv);
+                
+                // Save reference to the prayer element
+                prayer.element = prayerDiv;
+            });
+            const nightTimesContainer = document.getElementById('night-times');
+            NightTimes.forEach(night => {
+                const nightDiv = document.createElement('div');
+                nightDiv.className = 'night-time';
+                nightDiv.innerHTML = `<span>${night.name}</span> <span>${night.time}</span>`;
+                nightTimesContainer.appendChild(nightDiv);
+
+                // Save reference to the night element
+                night.element = nightDiv;
+            });
+
+            const timeLeftDiv = document.getElementById('time-left');
+            timeLeftDiv.textContent = timeToIftar;
+            displayCurrentDate();
+            displayHijriDate(); // Display the Hijri date
+
+            // Highlight the current prayer every 30 seconds
+            setInterval(() => highlightNextPrayer(prayerTimes), 30);
+        })
+        .catch(error => console.error('Error fetching prayer times:', error));
+fetchDailyHadith();
+</script>
+</body>
+</html>
